@@ -1,6 +1,6 @@
 CXXFLAGS:=-std=gnu++17 -Wall -O2 -MMD -MP -ggdb -pthread -fopenmp
 
-PROGRAMS = test exception smartfp string thread
+PROGRAMS = test exception smartfp string thread memory
 
 all: $(PROGRAMS)
 
@@ -13,5 +13,8 @@ test: test.o
 	g++ -std=gnu++17 $^ -o $@ -pthread -fopenmp
 
 smartfp: smartfp.o 
+	g++ -std=gnu++17 $^ -o $@ -pthread -fopenmp
+
+memory: memory.o 
 	g++ -std=gnu++17 $^ -o $@ -pthread -fopenmp
 
