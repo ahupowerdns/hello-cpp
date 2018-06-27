@@ -1,6 +1,6 @@
-CXXFLAGS:=-std=gnu++17 -Wall -O2 -MMD -MP -ggdb -pthread -fopenmp
+CXXFLAGS:=-std=gnu++17 -Wall -O3 -MMD -MP -ggdb -pthread -fopenmp
 
-PROGRAMS = test exception smartfp string thread memory windex
+PROGRAMS = test exception smartfp string thread memory windex classes templates
 
 all: $(PROGRAMS)
 
@@ -21,3 +21,8 @@ memory: memory.o
 windex: windex.o 
 	g++ -std=gnu++17 $^ -o $@ -pthread -fopenmp
 
+classes: classes.o 
+	g++ -std=gnu++17 $^ -o $@ -pthread 
+
+templates: templates.o 
+	g++ -std=gnu++17 $^ -o $@ -pthread 

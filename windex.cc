@@ -7,6 +7,10 @@
 #include <fstream>
 #include <algorithm>
 
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/mman.h>
+
 std::string stringerror()
 {
   return strerror(errno);
@@ -126,6 +130,4 @@ int main(int argc, char** argv)
       cout<<"\tEnd of "<<iter->second.size()<<" hits"<<endl;
     }
   }
-    
-  
 }
