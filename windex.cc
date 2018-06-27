@@ -4,8 +4,8 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
-#include <unordered_set>
 #include <fstream>
+#include <algorithm>
 
 std::string stringerror()
 {
@@ -67,7 +67,7 @@ int main(int argc, char** argv)
   cout<<"Have "<<filenames.size()<<" files"<<endl;
   unsigned long wordcount=0, bytecount=0;
 
-  unordered_map<string, vector<Location>> allWords;
+  std::unordered_map<string, vector<Location>> allWords;
 
   unsigned int fileno=0;
   for(const auto& fname : filenames) {
@@ -86,17 +86,45 @@ int main(int argc, char** argv)
   }
   cout<<"\nRead "<<bytecount<<" bytes"<<endl;
 
+  std::vector<string> owords;
+  for(const auto& w : allWords) {
+    owords.push_back(w.first);
+  }
+  sort(owords.begin(), owords.end()); 
+  
   while(getline(cin, line)) {
-    auto iter = allWords.find(line);
-    if(iter == allWords.end()) {
-      cout<<"Word '"<<line<<"' was not found"<<endl;
+
+    if(line.empty())
       continue;
+    char lastchar  =*line.rbegin();
+    if(lastchar =='?' || lastchar=='*') {
+      line.resize(line.size()-1);
+      if(line.empty())
+        continue;
+      cout<<"Looking for words starting with '"<<line<<"'"<<endl;
+      auto iter = lower_bound(owords.begin(), owords.end(), line);
+      for(; iter != owords.end() && !iter->compare(0, line.size(), line); ++iter) {
+        if(lastchar=='?')
+          cout<<" "<<*iter<<endl;
+        else {
+          for(const auto& l : allWords.find(*iter)->second) {
+            cout<<"\t"<<*iter<<": File "<<filenames[l.fileno]<<", offset "<<l.offset<<endl;
+          }
+        }
+      }
     }
-    cout<<"Word '"<<line<<"' occurred "<<iter->second.size()<<" times: "<<endl;
-    for(const auto& l : iter->second) {
-      cout<<"\tFile "<<filenames[l.fileno]<<", offset "<<l.offset<<endl;
+    else {
+      auto iter = allWords.find(line);
+      if(iter == allWords.end()) {
+        cout<<"Word '"<<line<<"' was not found"<<endl;
+        continue;
+      }
+      cout<<"Word '"<<line<<"' occurred "<<iter->second.size()<<" times: "<<endl;
+      for(const auto& l : iter->second) {
+        cout<<"\tFile "<<filenames[l.fileno]<<", offset "<<l.offset<<endl;
+      }
+      cout<<"\tEnd of "<<iter->second.size()<<" hits"<<endl;
     }
-    cout<<"\tEnd of "<<iter->second.size()<<" hits"<<endl;
   }
     
   
