@@ -6,7 +6,8 @@
 #include <unordered_map>
 #include <fstream>
 #include <algorithm>
-
+#include <boost/container/small_vector.hpp>
+#include <boost/container/string.hpp>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
@@ -71,11 +72,11 @@ int main(int argc, char** argv)
   cout<<"Have "<<filenames.size()<<" files"<<endl;
   unsigned long wordcount=0, bytecount=0;
 
-  std::unordered_map<string, vector<Location>> allWords;
+  std::unordered_map<string, std::vector<Location>> allWords;
 
   unsigned int fileno=0;
   for(const auto& fname : filenames) {
-    cout<<"\rFile: "<<fname<<", have "<<wordcount<<" words, "<<allWords.size()<<" different"<<"..";
+    cout<<"\r"<<(fileno+1)<<"/"<<filenames.size()<<" "<<fname<<", "<<wordcount<<" words, "<<allWords.size()<<" different\x1B[K";
     cout.flush();
     SmartFP sfp(fname.c_str(), "r");
     std::string word;
@@ -95,9 +96,8 @@ int main(int argc, char** argv)
     owords.push_back(w.first);
   }
   sort(owords.begin(), owords.end()); 
-  
+  cout<<"Done indexing"<<endl;
   while(getline(cin, line)) {
-
     if(line.empty())
       continue;
     char lastchar  =*line.rbegin();
@@ -130,4 +130,5 @@ int main(int argc, char** argv)
       cout<<"\tEnd of "<<iter->second.size()<<" hits"<<endl;
     }
   }
+  _exit(0);
 }
