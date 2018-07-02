@@ -6,11 +6,7 @@
 #include <unordered_map>
 #include <fstream>
 #include <algorithm>
-#include <boost/container/small_vector.hpp>
-#include <boost/container/string.hpp>
-#include <fcntl.h>
 #include <unistd.h>
-#include <sys/mman.h>
 
 std::string stringerror()
 {
@@ -34,7 +30,7 @@ struct SmartFP
 
 bool getWord(FILE* fp, std::string& str, size_t& offset)
 {
-  str="";
+  str.clear();
   int c;
   for(;;) {
     c = getc_unlocked(fp);
@@ -91,16 +87,23 @@ int main(int argc, char** argv)
   }
   cout<<"\nRead "<<bytecount<<" bytes"<<endl;
 
+  // this is where we take all the unique words and sort them so we can
+  // do prefix searches too
+  
   std::vector<string> owords;
   for(const auto& w : allWords) {
     owords.push_back(w.first);
   }
   sort(owords.begin(), owords.end()); 
   cout<<"Done indexing"<<endl;
+
+  // normal word: search, if ends on '?', list matching words
+  // if ends on '*', search for all those words
+  
   while(getline(cin, line)) {
     if(line.empty())
       continue;
-    char lastchar  =*line.rbegin();
+    char lastchar  =*line.rbegin(); // rbegin() == reverse begin
     if(lastchar =='?' || lastchar=='*') {
       line.resize(line.size()-1);
       if(line.empty())
@@ -130,5 +133,5 @@ int main(int argc, char** argv)
       cout<<"\tEnd of "<<iter->second.size()<<" hits"<<endl;
     }
   }
-  _exit(0);
+  _exit(0); // cheating a bit for the benchmark, saves cleanup time
 }
