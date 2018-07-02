@@ -1,5 +1,8 @@
 #include <cstddef>
 #include <cstdint>
+#include <iostream>
+using std::cout;
+using std::endl;
 
 template<typename T>
 struct Vector
@@ -21,6 +24,16 @@ struct Vector
   {
     return contents[pos];
   }
+  template<typename C>
+  bool isSorted(C pred)
+  {
+    if(!size)
+      return true;
+    for(size_t n=0; n < size - 1; ++n)
+      if(!pred(contents[n], contents[n+1]))
+        return false;
+    return true;
+  }
 
 
   ~Vector()
@@ -36,7 +49,11 @@ struct Vector
 int main()
 {
   Vector<uint32_t> v;
-  for(unsigned int n = 0 ; n < 1000000000; ++n) {
+  for(unsigned int n = 0 ; n < 10; ++n) {
     v.push_back(n);
   }
+  cout<<v.size<<endl;
+  
+  cout<< v.isSorted([](const auto& a, const auto& b) {
+      return a < b; });
 }
