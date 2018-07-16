@@ -7,7 +7,8 @@
 #include <fstream>
 #include <algorithm>
 #include <unistd.h>
-
+#include "bytell_hash_map.hpp"
+#include <set>
 std::string stringerror()
 {
   return strerror(errno);
@@ -56,7 +57,7 @@ struct Location
 {
   unsigned int fileno;
   size_t offset;
-};
+} __attribute__((packed)); 
 
 int main(int argc, char** argv)
 {
@@ -68,7 +69,8 @@ int main(int argc, char** argv)
   cout<<"Have "<<filenames.size()<<" files"<<endl;
   unsigned long wordcount=0, bytecount=0;
 
-  std::unordered_map<string, std::vector<Location>> allWords;
+  //std::unordered_map<string, std::vector<Location>> allWords;
+  ska::bytell_hash_map<string, std::vector<Location>> allWords;
 
   unsigned int fileno=0;
   for(const auto& fname : filenames) {
@@ -89,14 +91,52 @@ int main(int argc, char** argv)
 
   // this is where we take all the unique words and sort them so we can
   // do prefix searches too
-  
+
   std::vector<string> owords;
+  owords.reserve(allWords.size());
   for(const auto& w : allWords) {
     owords.push_back(w.first);
   }
-  sort(owords.begin(), owords.end()); 
+  sort(owords.begin(), owords.end());
+  
   cout<<"Done indexing"<<endl;
 
+  vector<pair<std::string, size_t> > popcount;
+  for(const auto& w : allWords)
+    popcount.push_back({w.first, w.second.size()});
+
+  auto cmp = [](const auto& a, const auto& b)
+       {
+         return b.second < a.second;
+       };
+
+  int top = std::min(popcount.size(), (size_t)20);
+  nth_element(popcount.begin(), popcount.begin() + top, popcount.end(), cmp);
+  sort(popcount.begin(), popcount.begin() + top, cmp);
+
+  int count=0;
+  for(const auto& e : popcount) {
+    if(++count > top)
+      break;
+    cout << count << "\t" << e.first << "\t" << e.second << endl;
+  }
+
+  cout<<"Words present in most files: "<<endl;
+  popcount.clear(); 
+  for(const auto& w : allWords) {
+    set<uint32_t> uni;
+    for(const auto& f : w.second)
+      uni.insert(f.fileno);
+    popcount.push_back({w.first, uni.size()});
+  }
+  
+  sort(popcount.begin(), popcount.end(), cmp);
+  count=0;
+  for(const auto& e : popcount) {
+    cout<<count<<"\t"<<e.first<<"\t"<<e.second<<endl;
+    if(++count > 19)
+      break;
+  }
   // normal word: search, if ends on '?', list matching words
   // if ends on '*', search for all those words
   
@@ -133,5 +173,6 @@ int main(int argc, char** argv)
       cout<<"\tEnd of "<<iter->second.size()<<" hits"<<endl;
     }
   }
+
   _exit(0); // cheating a bit for the benchmark, saves cleanup time
 }
