@@ -1,6 +1,6 @@
 CXXFLAGS:=-std=gnu++17 -Wall -O3 -MMD -MP -ggdb -pthread -fopenmp -Iext/flat_hash_map
 
-PROGRAMS = test exception smartfp string thread memory windex windex-par classes templates lambdas multi
+PROGRAMS = test exception smartfp string thread memory windex windex-par classes templates lambdas multi move
 
 all: $(PROGRAMS)
 
@@ -36,4 +36,7 @@ lambdas: lambdas.o
 
 
 multi: multi.o 
+	g++ -std=gnu++17 $^ -o $@ -pthread 
+
+move: move.o 
 	g++ -std=gnu++17 $^ -o $@ -pthread 
