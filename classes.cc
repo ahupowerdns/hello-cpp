@@ -1,6 +1,8 @@
 #include <string>
 #include <time.h>
 #include <iostream>
+#include <deque>
+#include <memory>
 
 class Event
 {
@@ -22,7 +24,7 @@ std::string Event::getType()
 class PortScanEvent : public Event
 {
 public:
-  PortScanEvent() 
+  PortScanEvent(std::string fromIP) : m_fromIP(fromIP) 
   {
     m_type = "Portscan";
   }
@@ -54,7 +56,7 @@ using namespace std;
 
 int main()
 {
-  PortScanEvent pse;
+  PortScanEvent pse("1.2.3.4");
   cout << pse.getType() << endl;
   ICMPEvent ice;
   cout << ice.getType() << endl;
@@ -69,6 +71,15 @@ int main()
   if(ptr) {
     cout<<"This is a PortScanEvent"<<endl;
   }
- 
+
+
+  std::deque<std::unique_ptr<Event>> eventQueue;
+
+  eventQueue.push_back(std::make_unique<PortScanEvent>("1.2.3.4"));
+  eventQueue.push_back(std::make_unique<ICMPEvent>());
+
+  for(const auto& e : eventQueue) {
+    cout << e->getDescription() << endl;
+  }
   
 }
