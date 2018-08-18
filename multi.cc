@@ -24,10 +24,10 @@ std::ostream& operator<<(std::ostream& ios, const IPAddress& ip)
 
 constexpr uint32_t chtonl(uint32_t s)
 {
-    return (
+    return 
         ((s & 0x000000FF) << 24) | ((s & 0x0000FF00) << 8)
-      | ((s & 0xFF000000) >> 24) | ((s & 0x00FF0000) >> 8)
-    );
+      | ((s & 0xFF000000) >> 24) | ((s & 0x00FF0000) >> 8);
+    
 }
 
 constexpr IPAddress operator "" _ipv4(const char* p, size_t l)
